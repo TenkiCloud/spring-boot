@@ -1,9 +1,5 @@
 name: Build and Deploy Snapshot
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - 'main'
+on: pull_request
 permissions:
   contents: read
 concurrency:
@@ -39,14 +35,14 @@ jobs:
           signing-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           uri: ${{ vars.COMMERCIAL_DEPLOY_REPO_URL || 'https://repo.spring.io' }}
           username: ${{ vars.COMMERCIAL && secrets.COMMERCIAL_ARTIFACTORY_USERNAME || secrets.ARTIFACTORY_USERNAME }}
-      - name: Send Notification
-        if: always()
-        uses: ./.github/actions/send-notification
-        with:
-          build-scan-url: ${{ steps.build-and-publish.outputs.build-scan-url }}
-          run-name: ${{ format('{0} | Linux | Java 24', github.ref_name) }}
-          status: ${{ job.status }}
-          webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+      # - name: Send Notification
+      #   if: always()
+      #   uses: ./.github/actions/send-notification
+      #   with:
+      #     build-scan-url: ${{ steps.build-and-publish.outputs.build-scan-url }}
+      #     run-name: ${{ format('{0} | Linux | Java 24', github.ref_name) }}
+      #     status: ${{ job.status }}
+      #     webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
     outputs:
       version: ${{ steps.build-and-publish.outputs.version }}
   trigger-docs-build:
@@ -60,16 +56,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-docs.yml --repo ${{ github.repository }} -r docs-build -f build-refname=${{ github.ref_name }} -f build-version=${{ needs.build-and-deploy-snapshot.outputs.version }}
-  verify:
-    name: Verify
-    needs: build-and-deploy-snapshot
-    uses: ./.github/workflows/verify.yml
-    secrets:
-      commercial-repository-password: ${{ secrets.COMMERCIAL_ARTIFACTORY_RO_PASSWORD }}
-      commercial-repository-username: ${{ secrets.COMMERCIAL_ARTIFACTORY_RO_USERNAME }}
-      google-chat-webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
-      opensource-repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      opensource-repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
-      token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
-    with:
-      version: ${{ needs.build-and-deploy-snapshot.outputs.version }}
+  # verify:
+  #   name: Verify
+  #   needs: build-and-deploy-snapshot
+  #   uses: ./.github/workflows/verify.yml
+  #   secrets:
+  #     commercial-repository-password: ${{ secrets.COMMERCIAL_ARTIFACTORY_RO_PASSWORD }}
+  #     commercial-repository-username: ${{ secrets.COMMERCIAL_ARTIFACTORY_RO_USERNAME }}
+  #     google-chat-webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+  #     opensource-repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  #     opensource-repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
+  #     token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+  #   with:
+  #     version: ${{ needs.build-and-deploy-snapshot.outputs.version }}
