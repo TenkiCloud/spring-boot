@@ -8,7 +8,7 @@ permissions:
 jobs:
   run-system-tests:
     name: 'Java ${{ matrix.java.version}}'
-    if: ${{ github.repository == 'spring-projects/spring-boot' }}
+    # if: ${{ github.repository == 'spring-projects/spring-boot' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
