@@ -9,7 +9,7 @@ jobs:
   run-system-tests:
     name: 'Java ${{ matrix.java.version}}'
     # if: ${{ github.repository == 'spring-projects/spring-boot' }}
-    runs-on: ubuntu-latest
+    runs-on: tenki-standard-autoscale
     strategy:
       matrix:
         java:
